@@ -1,0 +1,16 @@
+*.wav filter=lfs diff=lfs merge=lfs -text
+11809_Hot_air_balloon_Basket_support_diff.jpg filter=lfs diff=lfs merge=lfs -text
+11809_Hot_air_balloon_Burner_spec.jpg filter=lfs diff=lfs merge=lfs -text
+11809_Hot_air_balloon_Floor_diff.jpg filter=lfs diff=lfs merge=lfs -text
+11809_Hot_air_balloon_Hot_air_balloon_diff.jpg filter=lfs diff=lfs merge=lfs -text
+Map__11_Normal[[:space:]]Bump.jpg filter=lfs diff=lfs merge=lfs -text
+11809_Hot_air_balloon_Baloon_top_diff.jpg filter=lfs diff=lfs merge=lfs -text
+11809_Hot_air_balloon_Basket_diff.jpg filter=lfs diff=lfs merge=lfs -text
+11809_Hot_air_balloon_Basket_spec.jpg filter=lfs diff=lfs merge=lfs -text
+11809_Hot_air_balloon_Burner_diff.jpg filter=lfs diff=lfs merge=lfs -text
+Map__15_Normal[[:space:]]Bump.jpg filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
+11809_Hot_air_balloon_Basket_support_spec.jpg filter=lfs diff=lfs merge=lfs -text
+11809_Hot_air_balloon_refl.jpg filter=lfs diff=lfs merge=lfs -text
+Map__17_Normal[[:space:]]Bump.jpg filter=lfs diff=lfs merge=lfs -text
+*.bmp filter=lfs diff=lfs merge=lfs -text
