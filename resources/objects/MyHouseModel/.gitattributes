@@ -1,4 +1,0 @@
-texture.png filter=lfs diff=lfs merge=lfs -text
-container2.bmp filter=lfs diff=lfs merge=lfs -text
-texture.bmp filter=lfs diff=lfs merge=lfs -text
-*.jpg filter=lfs diff=lfs merge=lfs -text

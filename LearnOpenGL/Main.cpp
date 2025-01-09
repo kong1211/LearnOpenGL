@@ -6,7 +6,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
 #include "shader.h"
 #include "camera.h"
 #include "modelcamera.h"
@@ -17,6 +16,7 @@
 #include "filesystem.h"
 #include "model.h"
 #include "PerlinNoise.h"
+#include"TextRenderer.h"
 #pragma comment(lib,"winmm.lib")
 // 函数声明区域
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -98,20 +98,30 @@ float Screenvertices[] = {
         1.0f, -1.0f, 0.0f,   1.0f, 0.0f   // Bottom Rights
 };
 
+
 std::string SphereDiffsue_1 = "scratched.jpg";
 std::string SphereSpecular_1 = "container2_specular.png";
 std::string SphereDiffuse_2 = "container2.png";
 std::string SphereSpecular_2 = "normal.png";
-std::string TorusImage1 = "silk.png";
+std::string TorusImage1 =  "silk.png";
 std::string TorusImage2 = "silk.png";
 std::string ConeImage1 = "11096.jpg";
 std::string ConeImage2 = "silk2.jpg";
 std::string BackgroundImg = "8296224.jpg";
 
-std::string HouseTexture = "../resources/objects/MyHouseModel/texture.png";
+std::string HouseTexture =  "../resources/objects/MyHouseModel/texture.png";
 
 std::string NoiseTexture = "noise-perlin1.jpg";
 
+
+std::string yaolinzhang = "house2.obj";
+
+//PBR Render
+std::string PBR_AO = "../resources/objects/backpack/ao.jpg";
+std::string PBR_DIF = "../resources/objects/backpack/diffuse.jpg";
+std::string PBR_NORM = "../resources/objects/backpack/normal.png";
+std::string PBR_ROGUH = "../resources/objects/backpack/roughness.jpg";
+std::string PBR_SPELUR = "../resources/objects/backpack/specular.jpg";
 
 //change light color
 bool changeLightColor = true;
@@ -140,7 +150,12 @@ void generate_map_chunk(GLuint& VAO, int xOffset, int yOffset, std::vector<plant
 //方向光，点光源
 glm::vec3 lightDirection = glm::vec3(0.1f, -.81f, -.61f);
 
-
+glm::vec3 lightPositions[] = {
+    glm::vec3(0.0f, 0.0f, 10.0f),
+};
+glm::vec3 lightColors[] = {
+    glm::vec3(150.0f, 150.0f, 150.0f),
+};
 
 int main()
 {
@@ -186,6 +201,7 @@ int main()
     Shader screenShader("quad.vert", "quad.frag");
     Shader terrainShader("terrain.vs", "terrain.fs");
     Shader normalshader("normal.vs", "normal.fs");
+    Shader pbrshader("pbr.vs","pbr.fs");
      unsigned int VBO, cubeVAO;
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &VBO);
@@ -220,7 +236,16 @@ int main()
     unsigned int textureMap = loadTexture(HouseTexture.c_str());
 
     unsigned int noiseMap = loadTexture(NoiseTexture.c_str());
-       
+
+
+
+    //load pbr texture
+    unsigned int AO = loadTexture(PBR_AO.c_str());
+    unsigned int DIF = loadTexture(PBR_DIF.c_str());
+    unsigned int NORM = loadTexture(PBR_NORM.c_str());
+    unsigned int ROGUH = loadTexture(PBR_ROGUH.c_str());
+    unsigned int SPELUR = loadTexture(PBR_SPELUR.c_str());
+
     // shader configuration
     // --------------------
     lightingShader.use();
@@ -253,13 +278,13 @@ int main()
 
 
     //载入模型
-    Model ourModel("../resources/objects/backpack/backpack.obj");
+    Model packModel("../resources/objects/backpack/backpack.obj");
     Model AirBallonModel("../resources/objects/AirBallon/11809_Hot_air_balloon_l2.obj");
     Model HouseModel("../resources/objects/planet/planet.stl");
     
     Shader ourShader("model.vs", "model.fs");
 
-
+    Model SignModel(yaolinzhang);
 
 
     //PCG START
@@ -499,22 +524,50 @@ int main()
         shapeRenderer->renderCone(0.5f, 0.1f, 64, 32);
 
         // don't forget to enable shader before setting uniforms
-        ourShader.use();
-
+        pbrshader.use();
+        glm::vec3 newPos = lightPositions[0] + glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0);
+        newPos = lightPositions[0];
+        pbrshader.setVec3("lightPositions[" + std::to_string(0) + "]", newPos);
+        pbrshader.setVec3("lightColors[" + std::to_string(0) + "]", lightColors[0]);
         // view/projection transformations
         projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         view = camera.GetViewMatrix();
-        ourShader.setMat4("projection", projection);
-        ourShader.setMat4("view", view);
-
+        pbrshader.setMat4("projection", projection);
+        pbrshader.setMat4("view", view);
+        pbrshader.setInt("albedoMap", 0);
+        pbrshader.setInt("normalMap", 1);
+        pbrshader.setInt("metallicMap", 2);
+        pbrshader.setInt("roughnessMap", 3);
+        pbrshader.setInt("aoMap", 4);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, DIF);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, NORM);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, SPELUR);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, ROGUH);
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_2D, AO);
         // render the loaded model
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 2.0f, 0.0f)); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));	// it's a bit too big for our scene, so scale it down
-        ourShader.setMat4("model", model);
-        ourModel.Draw(ourShader);
+        model = glm::translate(model, newPos);
+        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	// it's a bit too big for our scene, so scale it down
+        pbrshader.setMat4("model", model);
+        packModel.Draw(pbrshader);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_2D, 0);
 
 
+        ourShader.use();
         //render AirBallon Model
         projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         view = camera.GetViewMatrix();
@@ -523,8 +576,8 @@ int main()
 
         // render the loaded model
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(1.0f, 1.0f, 0.0f)); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(0.001f, 0.001f, 0.001f));	// it's a bit too big for our scene, so scale it down
+        model = glm::translate(model, glm::vec3(1.0f, 2.0f, 0.0f)); // translate it down so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f));	// it's a bit too big for our scene, so scale it down
         model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));	// it's a bit too big for our scene, so scale it down
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -533,7 +586,24 @@ int main()
         AirBallonModel.Draw(ourShader);
 
 
+        //绘制签名模型
+        projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        view = camera.GetViewMatrix();
+        ourShader.setMat4("projection", projection);
+        ourShader.setMat4("view", view);
 
+        // render the loaded model
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(1.0f, 1.0f, 0.0f)); // translate it down so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));	// it's a bit too big for our scene, so scale it down
+        model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));	// it's a bit too big for our scene, so scale it down
+        //model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        //model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        ourShader.setMat4("model", model);
+        // 绑定纹理
+        SignModel.Draw(ourShader);
+        
         //绘制海洋模型
         projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         view = camera.GetViewMatrix();

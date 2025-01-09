@@ -76,6 +76,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>..\include;..\Dependencies\glfw-3.3.bin.WIN64\include;..\Dependencies\glad\include;$(IncludePath)</IncludePath>
     <LibraryPath>..\Dependencies\glfw-3.3.bin.WIN64\lib-vc2019;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)LearnOpenGL</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -95,13 +96,13 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp14</LanguageStandard>
-      <AdditionalIncludeDirectories>F:\UnityLearn\Sets\1229\LearnOpenGL\COMP3016\LearnOpenGL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>F:\UnityLearn\Sets\1229\LearnOpenGL\COMP3016\LearnOpenGL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -161,10 +162,13 @@
     <None Include="model.vs" />
     <None Include="normal.fs" />
     <None Include="normal.vs" />
+    <None Include="pbr.fs" />
+    <None Include="pbr.vs" />
     <None Include="quad.frag" />
     <None Include="quad.vert" />
     <None Include="terrain.fs" />
     <None Include="terrain.vs" />
+    <None Include="TextRenderer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
